@@ -40,3 +40,6 @@ build/
 ### config file ###
 src/main/resources/config.properties
 *.properties
+node_modules
+Dockerfile
+package-lock.json
