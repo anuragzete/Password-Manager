@@ -1,0 +1,14 @@
+services:
+  - name: password-manager-backend
+    type: web
+    env: docker
+    region: oregon
+    plan: free
+    rootDir: .
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        value: mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<db_name>
+      - key: PORT
+        value: 8080
+    autoDeploy: true

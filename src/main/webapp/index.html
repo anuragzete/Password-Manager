@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Password Manager</title>
+    <title>Password Manager</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
+<!-- ✅ Authentication Modal -->
 <div id="authModal" class="modal show">
     <div class="modal-content">
         <h2>Welcome to Password Manager</h2>
@@ -15,15 +17,21 @@
             <div id="signInForm">
                 <h3>Sign In</h3>
                 <input type="text" id="signInUsername" placeholder="Username" required>
-                <input type="password" id="signInPassword" placeholder="Master Password" required>
+                <div class="password-wrapper">
+                    <input type="password" id="signInPassword" placeholder="Master Password" required>
+                    <i class="fa fa-eye eye-icon" onclick="togglePassword('signInPassword')"></i>
+                </div>
                 <button id="signInBtn">Sign In</button>
                 <p>Don't have an account? <a href="#" id="switchToSignUp">Sign Up</a></p>
             </div>
 
-            <div id="signUpForm" style="display:none;">
+            <div id="signUpForm" class="hidden">
                 <h3>Sign Up</h3>
                 <input type="text" id="signUpUsername" placeholder="Username" required>
-                <input type="password" id="signUpPassword" placeholder="Master Password" required>
+                <div class="password-wrapper">
+                    <input type="password" id="signUpPassword" placeholder="Master Password" required>
+                    <i class="fa fa-eye eye-icon" onclick="togglePassword('signUpPassword')"></i>
+                </div>
                 <button id="signUpBtn">Sign Up</button>
                 <p>Already have an account? <a href="#" id="switchToSignIn">Sign In</a></p>
             </div>
@@ -31,10 +39,23 @@
     </div>
 </div>
 
-<div class="container" style="display:none;" id="mainContent">
-    <h1>Simple Password Manager</h1>
+<!-- ✅ Main Container -->
+<div class="container hidden" id="mainContent">
 
-    <form id="addPasswordForm">
+    <!-- ✅ Header with Profile Dropdown -->
+    <header>
+        <h1>Password Manager</h1>
+        <div class="profile-section">
+            <button id="profileBtn"><i class="fas fa-user-circle"></i></button>
+            <div id="profileModal" class="profile-modal hidden">
+                <p id="profileUsername">Username</p>
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ✅ Add Password Form -->
+    <form id="addPasswordForm" class="password-form">
         <h2>Add New Password</h2>
         <div class="form-group">
             <input type="text" id="websiteInput" placeholder="Website or App Name" required>
@@ -45,13 +66,13 @@
         <button type="submit">Save Password</button>
     </form>
 
-    <div id="passwordList"></div>
+    <!-- ✅ Password List -->
+    <div id="passwordList" class="password-list"></div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script src="./main.js" type="module"></script>
-<script src="./auth.js" type="module"></script>
-<script src="./crypt.js" type="module"></script>
-<script src="./crud.js" type="module"></script>
+
 </body>
 </html>

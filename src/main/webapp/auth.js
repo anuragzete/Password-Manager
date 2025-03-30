@@ -1,26 +1,28 @@
-import { encryptPassword } from './crypto.js';
-import { loadPasswords } from "./crud.js";
+/*import { encryptPassword } from './crypt.js';*/
+import {fetchPasswords} from "./sync.js";
+import {decryptPassword, encryptPassword} from "./crypt";
 
-const fetchRequest = async (url, method, data = {}) => {
+const fetchRequest = async (url, method, data = null) => {
     try {
-        const response = await fetch(url, {
+        const options = {
             method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
+            headers: {'Content-Type': 'application/json'}
+        };
+
+        if (data) {
+            options.body = JSON.stringify(data);
+        }
+
+        const response = await fetch(url, options);
+        const result = await response.json();
 
         if (!response.ok) {
-            const errorMsg = await response.text();
-            throw new Error(`Error: ${response.status} - ${errorMsg}`);
+            throw new Error(result.error || `Error: ${response.status}`);
         }
 
-        try {
-            return await response.json();
-        } catch (jsonError) {
-            throw new Error('Failed to parse JSON response');
-        }
+        return result;
+
     } catch (error) {
-        console.error(`Fetch error: ${error.message}`);
         alert(`Request failed: ${error.message}`);
         throw error;
     }
@@ -32,15 +34,17 @@ const signUp = async (username, password) => {
         return;
     }
 
-    const encryptedMasterPassword = encryptPassword(password, username);
-
+    const encpassword = encryptPassword(password, username);
+    console.log(username + " " + password + " " + encpassword);
+    const decpassword = decryptPassword(encpassword, username);
+    console.log(decpassword);
     try {
-        const result = await fetchRequest('/auth?action=signup', 'POST', {
+        const result = await fetchRequest('/Password_Manager_Backend_war_exploded/auth?action=signup', 'POST', {
             username,
-            password: encryptedMasterPassword
+            encryptedPassword: password
         });
 
-        if (result.status === 'User registered successfully') {
+        if (result.status === 'success') {
             alert('Sign Up successful! Please Sign In.');
             document.getElementById('switchToSignIn').click();
         } else {
@@ -51,40 +55,43 @@ const signUp = async (username, password) => {
     }
 };
 
+
 const signIn = async (username, password) => {
     if (!username || !password) {
         alert('Please enter both username and password!');
         return;
     }
 
-    const encryptedMasterPassword = encryptPassword(password, username);
-
+    //const encryptedMasterPassword = encryptPassword(password, username);
+    console.log(username + " " + password);
     try {
-        const result = await fetchRequest('/auth?action=signin', 'POST', {
+        const result = await fetchRequest('/Password_Manager_Backend_war_exploded/auth?action=signin', 'POST', {
             username,
-            password: encryptedMasterPassword
+            encryptedPassword: password
         });
 
-        if (result.userId) {
+        if (result.status === 'success' && result.userId) {
             sessionStorage.setItem('username', username);
             sessionStorage.setItem('userId', result.userId);
-            sessionStorage.setItem('masterPassword', encryptedMasterPassword);
+            sessionStorage.setItem('masterPassword', password);
 
             document.getElementById('authModal').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
 
-            await loadPasswords();
+            await fetchPasswords();
         } else {
-            alert('Invalid username or password');
+            alert(result.error || 'Invalid username or password');
         }
+
     } catch (error) {
         console.error('Sign In error:', error);
     }
 };
 
+// ✅ Logout Function
 const logout = () => {
     sessionStorage.clear();
     window.location.reload();
 };
 
-export { signUp, signIn, logout };
+export {signUp, signIn, logout};

@@ -90,7 +90,8 @@ public class AuthServlet extends HttpServlet {
         userCollection.insertOne(newUser);
 
         response.setStatus(HttpServletResponse.SC_CREATED);
-        response.getWriter().write(new JSONObject().put("status", "success")
+        response.getWriter().write(new JSONObject()
+                .put("status", "success")
                 .put("userId", newUser.getObjectId("_id").toString())
                 .toString());
     }
