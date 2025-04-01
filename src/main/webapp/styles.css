@@ -1,4 +1,15 @@
-/* ✅ Global Styles */
+/* Base Styles */
+:root {
+    --primary-gradient: linear-gradient(135deg, #4F46E5, #7C3AED);
+    --surface-color: #ffffff;
+    --text-primary: #111827;
+    --text-secondary: #6B7280;
+    --border-color: #E5E7EB;
+    --focus-ring: #EEF2FF;
+    --danger-color: #EF4444;
+    --transition-speed: 0.2s;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,193 +17,389 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f0f0f0, #dcdcdc);
-    color: #333;
-    line-height: 1.6;
-    min-height: 100vh;
-    padding: 20px;
+    font-family: 'Inter', sans-serif;
+    background-color: #F3F4F6;
+    color: var(--text-primary);
+    line-height: 1.5;
 }
 
-/* ✅ Modal Styles */
-.modal, .profile-modal {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* Blurred Background Effect */
+.blurred-background {
+    backdrop-filter: blur(5px); /* Adjust the blur value as needed */
+    filter: blur(5px); /* Optional, adds more blur effect */
+}
+
+
+/* Navigation Bar */
+.navbar {
+    background-color: var(--surface-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-    transition: all 0.3s;
+    right: 0;
+    z-index: 100;
 }
 
-.modal-content {
-    background: #fff;
-    padding: 40px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 450px;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 0.4s;
-}
-
-.hidden {
-    display: none;
-}
-
-/* ✅ Form Styles */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-input {
-    padding: 12px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    transition: 0.3s;
-    width: 100%;
-}
-
-input:focus {
-    border-color: #4CAF50;
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-}
-
-button {
-    background: #4CAF50;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-    width: 100%;
-}
-
-button:hover {
-    background: #45a049;
-}
-
-/* ✅ Header and Profile */
-header {
+.nav-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
-    padding: 10px;
-    border-bottom: 2px solid #ccc;
 }
 
-header h1 {
-    font-size: 28px;
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.profile-section {
+.logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.nav-profile {
     position: relative;
-    display: inline-block;
 }
 
-#profileBtn {
-    background: transparent;
+.profile-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
     border: none;
-    font-size: 40px;
-    color: #555;
+    background: none;
     cursor: pointer;
-    transition: 0.3s;
+    color: var(--text-secondary);
+    transition: color var(--transition-speed);
 }
 
-#profileBtn:hover {
-    color: #4CAF50;
+.profile-button:hover {
+    color: var(--text-primary);
 }
 
-/* ✅ Profile Modal */
-.profile-modal {
+.profile-dropdown {
     position: absolute;
-    top: 60px;
+    top: 100%;
     right: 0;
-    width: 200px;
-    background: #fff;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    z-index: 1100;
-    padding: 15px;
-    animation: fadeIn 0.4s;
+    margin-top: 0.5rem;
+    background-color: var(--surface-color);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: all var(--transition-speed);
 }
 
-#profileUsername {
-    font-size: 18px;
-    margin-bottom: 10px;
-    color: #444;
+.nav-profile:hover .profile-dropdown {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
-#logoutBtn {
-    background: #ff4d4d;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s;
+.logout-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all var(--transition-speed);
 }
 
-#logoutBtn:hover {
-    background: #ff1a1a;
+.logout-button:hover {
+    background-color: #F3F4F6;
+    color: var(--text-primary);
 }
 
-/* ✅ Password List */
-.password-list {
+/* Main Content */
+.main-content {
+    max-width: 1280px;
+    margin: 5rem auto 2rem;
+    padding: 0 1rem;
+}
+
+/* Add Password Form */
+.add-password-section {
+    margin-bottom: 2rem;
+}
+
+.form-container {
+    background-color: var(--surface-color);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.input-group .material-icons {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all var(--transition-speed);
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.toggle-password,
+.toggle-visibility {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: color var(--transition-speed);
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-password:hover,
+.toggle-visibility:hover {
+    color: var(--text-primary);
+}
+
+.submit-button {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: var(--primary-gradient);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity var(--transition-speed);
+}
+
+.submit-button:hover {
+    opacity: 0.9;
+}
+
+/* Password List */
+.password-list h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.password-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px;
-    margin-top: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
 }
 
 .password-card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    transition: all 0.3s;
-    position: relative;
+    background-color: var(--surface-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
 }
 
 .password-card:hover {
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-    transform: translateY(-5px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* ✅ Icons */
-.icons {
+.card-header {
     display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.website-icon {
+    color: #4F46E5;
+}
+
+.card-content {
+    margin-bottom: 1rem;
+}
+
+.username {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.password-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-field input {
+    width: 100%;
+    padding: 0.5rem 2.5rem 0.5rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    font-family: monospace;
+}
+
+.password-field .toggle-visibility {
+    right: 0.25rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
     justify-content: flex-end;
-    gap: 15px;
+    margin-top: 1rem;
 }
 
-.icons i {
+.edit-button,
+.delete-button {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0.25rem;
     cursor: pointer;
-    color: #555;
-    font-size: 22px;
-    transition: 0.3s;
+    transition: all var(--transition-speed);
 }
 
-.icons i:hover {
-    color: #4CAF50;
+.edit-button {
+    color: #4F46E5;
+    background-color: #EEF2FF;
 }
 
+.delete-button {
+    color: var(--danger-color);
+    background-color: #FEE2E2;
+}
+
+.edit-button:hover,
+.delete-button:hover {
+    opacity: 0.9;
+}
+
+/* Auth Modal */
+.auth-modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-speed);
+}
+
+.auth-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background-color: var(--surface-color);
+    border-radius: 1rem;
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    transform: translateY(-20px);
+    transition: transform var(--transition-speed);
+}
+
+.auth-modal.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-content h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.875rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.switch-button {
+    background: none;
+    border: none;
+    color: #4F46E5;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.switch-button:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+    .nav-content {
+        padding: 0.75rem;
+    }
+
+    .profile-button span:not(.material-icons) {
+        display: none;
+    }
+
+    .form-container {
+        padding: 1.5rem;
+    }
+
+    .password-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        padding: 1.5rem;
+    }
+}
+
+/* Animations */
 @keyframes fadeIn {
-    0% {
+    from {
         opacity: 0;
-        transform: scale(0.9);
     }
-    100% {
+    to {
         opacity: 1;
-        transform: scale(1);
     }
+}
+
+.password-card {
+    animation: fadeIn 0.3s ease-in-out;
 }

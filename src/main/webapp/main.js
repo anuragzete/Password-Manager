@@ -1,6 +1,32 @@
 import { signIn, signUp, logout } from "./auth.js";
 import { fetchPasswords, syncPasswords } from "./sync.js";
 
+// Function to load user profile
+const loadProfile = () => {
+    const username = sessionStorage.getItem('username'); // Assuming username is stored after sign-in
+    const userId = sessionStorage.getItem('_id'); // Check for user ID in session storage
+
+    if (username && userId) {
+        document.getElementById('profile-username').textContent = username;
+        showMainContent(); // Show main content if user is signed in
+    } else {
+        showAuthModal(); // Show auth modal if not signed in
+    }
+};
+
+// Function to show the main content and hide the auth modal
+const showMainContent = () => {
+    document.getElementById('auth-modal').style.display = 'none'; // Hide the auth modal
+    document.getElementById('main-content').style.display = 'block'; // Show the main content (password manager)
+};
+
+// Function to show the auth modal
+const showAuthModal = () => {
+    document.getElementById('auth-modal').style.display = 'block'; // Show the auth modal
+    document.getElementById('main-content').style.display = 'none'; // Hide the main content
+};
+
+// Function to load passwords
 const loadPasswords = async () => {
     try {
         const passwords = await fetchPasswords();
@@ -9,9 +35,45 @@ const loadPasswords = async () => {
 
         if (passwords && passwords.length > 0) {
             passwords.forEach((pwd) => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `Website: ${pwd.site_name}, Username: ${pwd.username}, Password: ${pwd.password}`;
-                passwordContainer.appendChild(listItem);
+                const passwordCard = document.createElement('div');
+                passwordCard.classList.add('password-card');
+
+                const cardHeader = document.createElement('div');
+                cardHeader.classList.add('card-header');
+                cardHeader.innerHTML = `<span class="material-icons website-icon">language</span> <h3>${pwd.site_name}</h3>`;
+
+                const cardContent = document.createElement('div');
+                cardContent.classList.add('card-content');
+                cardContent.innerHTML = `
+                    <p class="username">${pwd.username}</p>
+                    <div class="password-field">
+                        <input type="password" value="••••••••" readonly>
+                        <button class="toggle-visibility">
+                            <span class="material-icons">visibility</span>
+                        </button>
+                    </div>
+                `;
+
+                const cardActions = document.createElement('div');
+                cardActions.classList.add('card-actions');
+                cardActions.innerHTML = `
+                    <button class="edit-button">
+                        <span class="material-icons">edit</span>
+                    </button>
+                    <button class="delete-button">
+                        <span class="material-icons">delete</span>
+                    </button>
+                `;
+
+                passwordCard.appendChild(cardHeader);
+                passwordCard.appendChild(cardContent);
+                passwordCard.appendChild(cardActions);
+
+                passwordContainer.appendChild(passwordCard);
+
+                // Add event listeners for edit and delete actions
+                passwordCard.querySelector('.delete-button').addEventListener('click', () => deletePassword(pwd._id));
+                passwordCard.querySelector('.toggle-visibility').addEventListener('click', togglePasswordVisibility);
             });
         } else {
             passwordContainer.innerHTML = '<li>No passwords found.</li>';
@@ -22,99 +84,90 @@ const loadPasswords = async () => {
     }
 };
 
-document.getElementById('switchToSignUp').addEventListener('click', () => switchForm('signUp'));
-document.getElementById('switchToSignIn').addEventListener('click', () => switchForm('signIn'));
-
-const switchForm = (form) => {
-    document.getElementById('signInForm').style.display = form === 'signIn' ? 'block' : 'none';
-    document.getElementById('signUpForm').style.display = form === 'signUp' ? 'block' : 'none';
+// Function to toggle password visibility
+const togglePasswordVisibility = (e) => {
+    const input = e.target.closest('.password-field').querySelector('input');
+    const visibilityButton = e.target;
+    if (input.type === 'password') {
+        input.type = 'text';
+        visibilityButton.textContent = 'visibility';
+    } else {
+        input.type = 'password';
+        visibilityButton.textContent = 'visibility_off';
+    }
 };
 
-document.getElementById('signUpBtn').addEventListener('click', async () => {
-    const username = document.getElementById('signUpUsername').value.trim();
-    const password = document.getElementById('signUpPassword').value.trim();
-
-    if (!username || !password) {
-        alert("Please fill in all fields.");
-        return;
-    }
-
+// Function to delete a password
+const deletePassword = async (id) => {
     try {
-        console.log(username+" "+password);
-        await signUp(username, password);
-        alert('Sign-up successful! Please sign in.');
-        switchForm('signIn');
-    } catch (error) {
-        console.log(username+" "+password);
-        console.error('Sign-up failed:', error);
-        alert('Sign-up failed. Please try again.');
-    }
-});
+        let passwords = await fetchPasswords();
+        passwords = passwords.filter(pwd => pwd._id !== id);
 
-document.getElementById('signInBtn').addEventListener('click', async () => {
-    const username = document.getElementById('signInUsername').value.trim();
-    const password = document.getElementById('signInPassword').value.trim();
-
-    if (!username || !password) {
-        alert("Please enter both username and password.");
-        return;
-    }
-
-    try {
-        console.log(username+" "+password);
-        await signIn(username, password);
-        alert('Sign-in successful!');
-
+        await syncPasswords(passwords);
         await loadPasswords();
     } catch (error) {
-        console.log(username+" "+password);
-        console.error('Sign-in failed:', error);
-        alert('Sign-in failed. Please check your credentials.');
+        console.error('Failed to delete password:', error);
+        alert('Failed to delete password. Please try again.');
     }
-});
+};
 
-document.getElementById('addPasswordForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const website = document.getElementById('websiteInput').value.trim();
-    const password = document.getElementById('passwordInput').value.trim();
-
-    if (!website || !password) {
-        alert("Please fill in both fields.");
-        return;
-    }
-
-    try {
-        const newPassword = {
-            site_name: website,
-            username: sessionStorage.getItem('username'),   // Use logged-in username
-            password: password
-        };
-
-        const existingPasswords = await fetchPasswords();
-        const updatedPasswords = existingPasswords ? [...existingPasswords, newPassword] : [newPassword];
-
-        await syncPasswords(updatedPasswords);
-
-        await loadPasswords();
-
-        document.getElementById('websiteInput').value = '';
-        document.getElementById('passwordInput').value = '';
-
-    } catch (error) {
-        console.error('Failed to add password:', error);
-        alert('Failed to add password. Please try again.');
-    }
-});
-
+// Event listener to handle logout
 document.getElementById('logout-button').addEventListener('click', () => {
     logout();
+    sessionStorage.removeItem('username'); // Remove username from session on logout
+    sessionStorage.removeItem('_id'); // Remove user ID from session on logout
+    loadProfile();
 });
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const userId = sessionStorage.getItem('userId');
-    if (userId) {
-        await loadPasswords();
+// Event listener for sign-in form
+document.getElementById('auth-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('authUsername').value;
+    const password = document.getElementById('authPassword').value;
+
+    // Decide whether it's sign-in or sign-up
+    const isSignUp = document.getElementById('modal-title').textContent === 'Create an Account';
+
+    try {
+        let result;
+        if (isSignUp) {
+            result = await signUp(username, password);
+        } else {
+            result = await signIn(username, password);
+        }
+
+        if (result.status === 'success') {
+            sessionStorage.setItem('username', username); // Save username in session
+            sessionStorage.setItem('_id', result._id); // Save user _id in session
+            loadProfile();
+            await loadPasswords(); // Load passwords after successful sign-in/signup
+            alert(`${isSignUp ? 'Sign-up' : 'Sign-in'} successful!`);
+        } else {
+            alert(`${isSignUp ? 'Sign-up' : 'Sign-in'} failed. Please check your credentials.`);
+        }
+    } catch (error) {
+        console.error('Authentication error:', error);
+        alert('An error occurred during authentication. Please try again.');
     }
 });
 
+// Event listener to handle switching between sign-in and sign-up forms
+document.getElementById('switch-button').addEventListener('click', () => {
+    const modalTitle = document.getElementById('modal-title');
+    const submitButton = document.getElementById('submit-button');
+
+    if (modalTitle.textContent === 'Welcome Back') {
+        modalTitle.textContent = 'Create an Account';
+        submitButton.textContent = 'Sign Up';
+        document.getElementById('switch-button').textContent = 'Already have an account? Sign in';
+    } else {
+        modalTitle.textContent = 'Welcome';
+        submitButton.textContent = 'Sign In';
+        document.getElementById('switch-button').textContent = 'Don\'t have an account? Sign up';
+    }
+});
+
+// Load the profile and passwords on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', async () => {
+    loadProfile(); // This checks sessionStorage for user data and shows the appropriate content
+});
