@@ -1,6 +1,8 @@
 import { signIn, signUp, logout } from "./auth.js";
 import { fetchPasswords, syncPasswords } from "./sync.js";
 
+let isSignIn = true; // Flag to track the current state
+
 // Function to load user profile
 const loadProfile = () => {
     const username = sessionStorage.getItem('username'); // Assuming username is stored after sign-in
@@ -119,21 +121,18 @@ document.getElementById('logout-button').addEventListener('click', () => {
     loadProfile();
 });
 
-// Event listener for sign-in form
-document.getElementById('auth-form').addEventListener('submit', async (e) => {
+// Event listener for form submission
+document.getElementById('submit-button').addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('authUsername').value;
     const password = document.getElementById('authPassword').value;
 
-    // Decide whether it's sign-in or sign-up
-    const isSignUp = document.getElementById('modal-title').textContent === 'Create an Account';
-
     try {
         let result;
-        if (isSignUp) {
-            result = await signUp(username, password);
-        } else {
+        if (isSignIn) {
             result = await signIn(username, password);
+        } else {
+            result = await signUp(username, password);
         }
 
         if (result.status === 'success') {
@@ -141,9 +140,9 @@ document.getElementById('auth-form').addEventListener('submit', async (e) => {
             sessionStorage.setItem('_id', result._id); // Save user _id in session
             loadProfile();
             await loadPasswords(); // Load passwords after successful sign-in/signup
-            alert(`${isSignUp ? 'Sign-up' : 'Sign-in'} successful!`);
+            alert(`${isSignIn ? 'Sign-in' : 'Sign-up'} successful!`);
         } else {
-            alert(`${isSignUp ? 'Sign-up' : 'Sign-in'} failed. Please check your credentials.`);
+            alert(`${isSignIn ? 'Sign-in' : 'Sign-up'} failed. Please check your credentials.`);
         }
     } catch (error) {
         console.error('Authentication error:', error);
@@ -153,17 +152,20 @@ document.getElementById('auth-form').addEventListener('submit', async (e) => {
 
 // Event listener to handle switching between sign-in and sign-up forms
 document.getElementById('switch-button').addEventListener('click', () => {
+    isSignIn = !isSignIn; // Toggle flag
+
     const modalTitle = document.getElementById('modal-title');
     const submitButton = document.getElementById('submit-button');
+    const switchButton = document.getElementById('switch-button');
 
-    if (modalTitle.textContent === 'Welcome Back') {
+    if (isSignIn) {
+        modalTitle.textContent = 'Welcome Back';
+        submitButton.textContent = 'Sign In';
+        switchButton.textContent = 'Don\'t have an account? Sign up';
+    } else {
         modalTitle.textContent = 'Create an Account';
         submitButton.textContent = 'Sign Up';
-        document.getElementById('switch-button').textContent = 'Already have an account? Sign in';
-    } else {
-        modalTitle.textContent = 'Welcome';
-        submitButton.textContent = 'Sign In';
-        document.getElementById('switch-button').textContent = 'Don\'t have an account? Sign up';
+        switchButton.textContent = 'Already have an account? Sign in';
     }
 });
 
