@@ -1,3 +1,4 @@
+/*
 import CryptoJS from 'crypto-js';
 
 // ✅ Derive Key using Provided Salt and Password
@@ -47,3 +48,4 @@ export function decryptPassword(encryptedPassword, salt, password) {
         return null;
     }
 }
+*/

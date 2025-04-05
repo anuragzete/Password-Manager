@@ -1,6 +1,5 @@
-/*import { encryptPassword } from './crypt.js';*/
+
 import {fetchPasswords} from "./sync.js";
-import {decryptPassword, encryptPassword} from "./crypt";
 
 const fetchRequest = async (url, method, data = null) => {
     try {
@@ -34,10 +33,7 @@ const signUp = async (username, password) => {
         return;
     }
 
-    const encpassword = encryptPassword(password, username);
-    console.log(username + " " + password + " " + encpassword);
-    const decpassword = decryptPassword(encpassword, username);
-    console.log(decpassword);
+    console.log(username + " " + password + " " + password);
     try {
         const result = await fetchRequest('/Password_Manager_Backend_war_exploded/auth?action=signup', 'POST', {
             username,
@@ -62,7 +58,6 @@ const signIn = async (username, password) => {
         return;
     }
 
-    //const encryptedMasterPassword = encryptPassword(password, username);
     console.log(username + " " + password);
     try {
         const result = await fetchRequest('/Password_Manager_Backend_war_exploded/auth?action=signin', 'POST', {

@@ -18,15 +18,35 @@ const loadProfile = () => {
 
 // Function to show the main content and hide the auth modal
 const showMainContent = () => {
-    document.getElementById('auth-modal').style.display = 'none'; // Hide the auth modal
-    document.getElementById('main-content').style.display = 'block'; // Show the main content (password manager)
+    const authModal = document.querySelector('.auth-modal');
+    const mainContent = document.querySelector('.main-content');
+
+    if (!authModal || !mainContent) {
+        console.error("Error: 'auth-modal' or 'main-content' element not found");
+        return;
+    }
+
+    authModal.style.display = 'block';
+    mainContent.style.display = 'none';
+
+    authModal.style.display = 'none'; // Hide the auth modal
+    mainContent.style.display = 'block'; // Show the main content (password manager)
 };
 
 // Function to show the auth modal
 const showAuthModal = () => {
-    document.getElementById('auth-modal').style.display = 'block'; // Show the auth modal
-    document.getElementById('main-content').style.display = 'none'; // Hide the main content
+    const authModal = document.querySelector('.auth-modal');
+    const mainContent = document.querySelector('.main-content');
+
+    if (!authModal || !mainContent) {
+        console.error("Error: 'auth-modal' or 'main-content' element not found");
+        return;
+    }
+
+    authModal.style.display = 'block';
+    mainContent.style.display = 'none';
 };
+
 
 // Function to load passwords
 const loadPasswords = async () => {
@@ -126,6 +146,7 @@ document.getElementById('submit-button').addEventListener('submit', async (e) =>
     e.preventDefault();
     const username = document.getElementById('authUsername').value;
     const password = document.getElementById('authPassword').value;
+    console.log(username+" "+password);
 
     try {
         let result;
