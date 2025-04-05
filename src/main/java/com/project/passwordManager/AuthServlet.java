@@ -35,16 +35,15 @@ public class AuthServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String action = request.getParameter("action");
-
-        if (action == null || action.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(new JSONObject().put("error", "Action parameter is required").toString());
-            return;
-        }
-
         try {
             JSONObject jsonObject = new JSONObject(new JSONTokener(request.getInputStream()));
+            String action = jsonObject.optString("action", "").trim();
+
+            if (action == null || action.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(new JSONObject().put("error", "Action parameter is required").toString());
+                return;
+            }
 
             switch (action) {
                 case "signup":
@@ -68,7 +67,7 @@ public class AuthServlet extends HttpServlet {
 
     private void handleSignup(JSONObject jsonObject, HttpServletResponse response) throws IOException {
         String username = jsonObject.optString("username", "").trim();
-        String password = jsonObject.optString("encryptedPassword", "").trim();
+        String password = jsonObject.optString("password", "").trim();
 
         if (username.isEmpty() || password.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -98,7 +97,7 @@ public class AuthServlet extends HttpServlet {
 
     private void handleSignin(JSONObject jsonObject, HttpServletResponse response) throws IOException {
         String username = jsonObject.optString("username", "").trim();
-        String password = jsonObject.optString("encryptedPassword", "").trim();
+        String password = jsonObject.optString("password", "").trim();
 
         if (username.isEmpty() || password.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
