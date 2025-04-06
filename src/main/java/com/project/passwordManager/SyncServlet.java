@@ -14,10 +14,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @WebServlet("/sync")
 public class SyncServlet extends HttpServlet {
@@ -109,27 +106,15 @@ public class SyncServlet extends HttpServlet {
             Document userDoc = userCollection.find(Filters.eq("_id", new ObjectId(userId))).first();
 
             if (userDoc != null) {
-                // Fetch server passwords as List<Document>
-                List<Document> passwordList = (List<Document>) userDoc.get("passwords");
-
-                // Convert List<Document> to JSONArray
-                JSONArray serverPasswords = new JSONArray();
-                for (Document passwordDoc : passwordList) {
-                    serverPasswords.put(new JSONObject(passwordDoc.toJson()));
-                }
-
-                // Merge local and server passwords
-                JSONArray mergedPasswords = mergePasswords(localPasswords, serverPasswords);
-
-                // Convert JSONArray back to List<Document> for MongoDB
+                // Convert JSONArray directly to List<Document>
                 List<Document> updatedPasswords = new ArrayList<>();
-                for (int i = 0; i < mergedPasswords.length(); i++) {
-                    JSONObject jsonPwd = mergedPasswords.getJSONObject(i);
+                for (int i = 0; i < localPasswords.length(); i++) {
+                    JSONObject jsonPwd = localPasswords.getJSONObject(i);
                     Document doc = Document.parse(jsonPwd.toString());
                     updatedPasswords.add(doc);
                 }
 
-                // Update MongoDB with the merged passwords
+                // Overwrite the passwords in MongoDB
                 userCollection.updateOne(
                         Filters.eq("_id", new ObjectId(userId)),
                         new Document("$set", new Document("passwords", updatedPasswords))
@@ -149,6 +134,7 @@ public class SyncServlet extends HttpServlet {
         }
     }
 
+
     private JSONArray mergePasswords(JSONArray local, JSONArray server) {
         Map<String, JSONObject> passwordMap = new HashMap<>();
 
@@ -157,7 +143,7 @@ public class SyncServlet extends HttpServlet {
             JSONObject serverPwd = server.getJSONObject(i);
 
             // Use fallback key to avoid JSONException
-            String key = serverPwd.optString("site_name", serverPwd.optString("site", "unknown_site"));
+            String key = serverPwd.optString("id", UUID.randomUUID().toString());
             passwordMap.put(key, serverPwd);
         }
 
@@ -166,8 +152,9 @@ public class SyncServlet extends HttpServlet {
             JSONObject localPwd = local.getJSONObject(i);
 
             // Use the same fallback key logic
-            String key = localPwd.optString("site_name", localPwd.optString("site", "unknown_site"));
-            passwordMap.put(key, localPwd);  // Local version will overwrite the server version
+            String key = localPwd.optString("id", UUID.randomUUID().toString());
+            passwordMap.put(key, localPwd);
+            // Local version will overwrite the server version
         }
 
         return new JSONArray(passwordMap.values());

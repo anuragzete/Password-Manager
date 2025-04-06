@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecurePass Manager</title>
+    <title>Secure Vault</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -30,12 +30,13 @@
 <div id="dashboard" class="hidden">
     <nav class="navbar">
         <div class="nav-brand">
-            <span class="material-icons">password</span>
-            SecurePass
+            <span class="material-icons">security</span>
+            Secure Vault
         </div>
         <div class="profile-dropdown">
             <button id="profileBtn" class="btn-icon">
                 <span class="material-icons">account_circle</span>
+                <span id="profileUsername" class="username-label"></span>
             </button>
             <div class="dropdown-content hidden">
                 <button id="themeToggleBtn">
@@ -86,7 +87,12 @@
 
 <!-- Toast Messages -->
 <div id="toast" class="toast hidden"></div>
-
+<!-- Add this in <head> or before </body> -->
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+<script type="module" src="crypt,js"></script>
 <script type="module" src="main.js"></script>
+<script type="module" src="dashboard.js"></script>
+<script type="module" src="auth.js"></script>
+<script type="module" src="sync.js"></script>
 </body>
 </html>

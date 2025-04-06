@@ -1,92 +1,72 @@
 
-import {fetchPasswords} from "./sync.js";
+import {fetchPasswords,handleEditPassword,handleAddPassword,handleDeletePassword} from "./sync.js";
+import {state,switchAuthTab,showDashboard,showToast,updateThemeToggleButton,togglePasswordVisibility,API,elements,toggleTheme,toggleProfileDropdown,setupEventListeners} from "./main.js";
+import {showEditModal,closeEditModal,renderPasswords} from "./dashbord.js";
+import {encryptPassword} from "./crypt.js";
+// Authentication
+async function handleAuth(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const isSignIn = document.querySelector('.tab-btn.active').dataset.tab === 'signin';
 
-const fetchRequest = async (url, method, data = null) => {
+    const submitBtn = elements.authForm.querySelector('button[type="submit"]');
+    const iconSpan = submitBtn.querySelector('.material-icons');
+    const textSpan = submitBtn.querySelector('#authButtonText');
+
+    // Save original values
+    const originalIcon = iconSpan.textContent;
+    const originalText = textSpan.textContent;
+
+    // Disable and update UI
+    submitBtn.disabled = true;
+    iconSpan.textContent = 'hourglass_empty';
+    textSpan.textContent = 'Please wait...';
+
     try {
-        const options = {
-            method,
-            headers: {'Content-Type': 'application/json'}
-        };
-
-        if (data) {
-            options.body = JSON.stringify(data);
-        }
-
-        const response = await fetch(url, options);
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.error || `Error: ${response.status}`);
-        }
-
-        return result;
-
-    } catch (error) {
-        alert(`Request failed: ${error.message}`);
-        throw error;
-    }
-};
-
-const signUp = async (username, password) => {
-    if (!username || !password) {
-        alert('Please fill in all fields!');
-        return;
-    }
-
-    console.log(username + " " + password + " " + password);
-    try {
-        const result = await fetchRequest('/Password_Manager_Backend_war_exploded/auth?action=signup', 'POST', {
-            username,
-            encryptedPassword: password
+        const masterPassword = encryptPassword(password,username,password);
+        const response = await fetch(API.auth, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username,
+                password:masterPassword,
+                action: isSignIn ? 'signin' : 'signup'
+            })
         });
 
-        if (result.status === 'success') {
-            alert('Sign Up successful! Please Sign In.');
-            document.getElementById('switchToSignIn').click();
-        } else {
-            alert(`Error during Sign Up: ${result.error}`);
-        }
+        if (!response.ok) throw new Error('Authentication failed');
+
+        const data = await response.json();
+        state.userId = data.userId;
+        sessionStorage.setItem('userId', data.userId);
+        sessionStorage.setItem('username',username);
+        sessionStorage.setItem('masterPassword',masterPassword);
+
+        showDashboard();
+        await fetchPasswords();
+        showToast('Authentication successful', 'success');
     } catch (error) {
-        console.error('Sign Up error:', error);
+        showToast(error.message, 'error');
+    } finally {
+        // Re-enable button after a short delay
+        setTimeout(() => {
+            iconSpan.textContent = originalIcon;
+            textSpan.textContent = originalText;
+            submitBtn.disabled = false;
+        }, 2000);
     }
-};
+}
 
 
-const signIn = async (username, password) => {
-    if (!username || !password) {
-        alert('Please enter both username and password!');
-        return;
-    }
+function handleLogout() {
+    sessionStorage.removeItem('userId');
+    state.userId = null;
+    state.username = null;
+    state.passwords = [];
+    elements.dashboard.classList.add('hidden');
+    elements.authModal.classList.remove('hidden');
+    showToast('Logged out successfully', 'success');
+}
 
-    console.log(username + " " + password);
-    try {
-        const result = await fetchRequest('/Password_Manager_Backend_war_exploded/auth?action=signin', 'POST', {
-            username,
-            encryptedPassword: password
-        });
-
-        if (result.status === 'success' && result.userId) {
-            sessionStorage.setItem('username', username);
-            sessionStorage.setItem('userId', result.userId);
-            sessionStorage.setItem('masterPassword', password);
-
-            document.getElementById('authModal').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-
-            await fetchPasswords();
-        } else {
-            alert(result.error || 'Invalid username or password');
-        }
-
-    } catch (error) {
-        console.error('Sign In error:', error);
-    }
-};
-
-// ✅ Logout Function
-const logout = () => {
-    sessionStorage.clear();
-    window.location.reload();
-};
-
-export {signUp, signIn, logout};
+export {handleAuth,handleLogout};

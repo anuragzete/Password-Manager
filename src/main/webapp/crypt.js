@@ -1,51 +1,60 @@
-/*
-import CryptoJS from 'crypto-js';
 
-// ✅ Derive Key using Provided Salt and Password
-function deriveKey(password, salt) {
-    return CryptoJS.PBKDF2(password, CryptoJS.enc.Utf8.parse(salt), {
-        keySize: 256 / 32,    // AES-256 key size
-        iterations: 10000      // Iterations for added security
+// ✅ Derive Key using Master Password and Username
+function deriveKey(masterPassword, username) {
+    return CryptoJS.PBKDF2(masterPassword, CryptoJS.enc.Utf8.parse(username), {
+        keySize: 256 / 32,
+        iterations: 10000
     });
 }
 
-// ✅ Encrypt Password with Provided Salt
-export function encryptPassword(password, salt) {
-    if (!password || !salt) {
-        console.error("Encryption failed: Missing password or salt.");
-        throw new Error("Encryption failed: Missing password or salt.");
+// ✅ Encrypt Data using Username as Salt
+function encryptPassword(data, username, masterPassword) {
+    if (!data || !username || !masterPassword) {
+        console.error("Encryption failed: Missing data, username, or master password.");
+        throw new Error("Encryption failed: Missing data, username, or master password.");
     }
 
-    const key = deriveKey(password, salt);  // Derive key from password and salt
+    const key = deriveKey(masterPassword, username);
+    const iv = CryptoJS.lib.WordArray.random(128 / 8);
 
-    const encrypted = CryptoJS.AES.encrypt(password, key);  // Encrypt using AES
+    const encrypted = CryptoJS.AES.encrypt(data, key, {
+        iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7
+    });
 
-    return encrypted.toString();  // Return Base64-encoded encrypted string
+    return `${iv.toString(CryptoJS.enc.Base64)}:${encrypted.toString()}`;
 }
 
-// ✅ Decrypt Password with Provided Salt
-export function decryptPassword(encryptedPassword, salt, password) {
-    if (!encryptedPassword || !salt || !password) {
-        console.error("Decryption failed: Missing encrypted password, salt, or password.");
-        throw new Error("Decryption failed: Missing encrypted password, salt, or password.");
+// ✅ Decrypt Data using Username as Salt
+function decryptPassword(encryptedData, username, masterPassword) {
+    if (!encryptedData || !username || !masterPassword) {
+        console.error("Decryption failed: Missing encrypted data, username, or master password.");
+        throw new Error("Decryption failed: Missing encrypted data, username, or master password.");
     }
 
     try {
-        const key = deriveKey(password, salt);  // Derive key with provided salt and password
+        const [ivBase64, encryptedBase64] = encryptedData.split(':');
+        const iv = CryptoJS.enc.Base64.parse(ivBase64);
+        const key = deriveKey(masterPassword, username);
 
-        const decryptedBytes = CryptoJS.AES.decrypt(encryptedPassword, key);  // Decrypt AES
-        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        const decrypted = CryptoJS.AES.decrypt(encryptedBase64, key, {
+            iv,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+        });
 
+        const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
         if (!decryptedText) {
             console.warn("Decryption returned empty result.");
             return null;
         }
 
         return decryptedText;
-
     } catch (error) {
         console.error("Decryption error:", error);
         return null;
     }
 }
-*/
+
+export {encryptPassword,decryptPassword};
